@@ -1,0 +1,36 @@
+tensorflow2.0 保存和加载模型
+
+1、保存全模型
+
+    model.save('the_save_model.h5')
+    new_model = keras.models.load_model('the_save_model.h5')
+
+2、保持为SavedModel文件
+
+    keras.experimental.export_saved_model(model, 'saved_model')
+    new_model = keras.experimental.load_from_saved_model('saved_model')
+
+3、仅保持网络结构，这样导出的模型并未包含训练好的参数
+
+    config = model.get_config()
+    reinitialized_model = keras.Model.from_config(config)
+    new_prediction = reinitialized_model.predict(x_test)
+    assert abs(np.sum(predictions-new_prediction)) >0
+
+4、仅保存网络参数
+
+    weights = model.get_weights()
+    model.set_weights(weights)
+    # 可以把结构和参数保存结合起来
+    config = model.get_config()
+    weights = model.get_weights()
+    new_model = keras.Model.from_config(config) # config只能用keras.Model的这个api
+    new_model.set_weights(weights)
+    new_predictions = new_model.predict(x_test)
+    np.testing.assert_allclose(predictions, new_predictions, atol=1e-6)
+
+6、保存网络权重为SavedModel格式
+
+    model.save_weights('weight_tf_savedmodel')
+    model.save_weights('weight_tf_savedmodel_h5', save_format='h5')
+
